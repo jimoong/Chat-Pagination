@@ -117,6 +117,7 @@ body {
   width: 100%;
   max-width: 800px;
   touch-action: pan-y; /* Allow vertical scroll, capture horizontal for swipe */
+  will-change: transform; /* Optimize for swipe animations */
 }
 
 .chat-thread::-webkit-scrollbar {
