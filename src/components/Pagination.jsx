@@ -171,9 +171,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange, expandedFromPage, o
         </svg>
       </button>
 
-      <span className="pagination__info">
+      {/* <span className="pagination__info">
         {currentPage + 1} / {totalPages}
-      </span>
+      </span> */}
     </div>
   );
 };
