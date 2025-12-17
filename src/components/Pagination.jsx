@@ -1,4 +1,19 @@
-const Pagination = ({ currentPage, totalPages, onPageChange, expandedFromPage }) => {
+import { useRef, useCallback, useEffect } from 'react';
+
+const Pagination = ({ currentPage, totalPages, onPageChange, expandedFromPage, onPreview }) => {
+  const dotsRef = useRef(null);
+  const isDragging = useRef(false);
+  const draggedPageIndex = useRef(null);
+  
+  // Store callbacks in refs to avoid stale closures in event listeners
+  const onPreviewRef = useRef(onPreview);
+  const onPageChangeRef = useRef(onPageChange);
+  
+  useEffect(() => {
+    onPreviewRef.current = onPreview;
+    onPageChangeRef.current = onPageChange;
+  }, [onPreview, onPageChange]);
+
   const goToPrevious = () => {
     if (currentPage > 0) {
       onPageChange(currentPage - 1);
@@ -22,6 +37,83 @@ const Pagination = ({ currentPage, totalPages, onPageChange, expandedFromPage })
     return classes.join(' ');
   };
 
+  // Find which dot is at the given touch coordinates
+  const getDotIndexAtPoint = useCallback((x, y) => {
+    if (!dotsRef.current) return null;
+    
+    const dots = dotsRef.current.querySelectorAll('.pagination__dot');
+    for (let i = 0; i < dots.length; i++) {
+      const rect = dots[i].getBoundingClientRect();
+      // Add some padding for easier touch targeting
+      const padding = 8;
+      if (
+        x >= rect.left - padding &&
+        x <= rect.right + padding &&
+        y >= rect.top - padding &&
+        y <= rect.bottom + padding
+      ) {
+        return i;
+      }
+    }
+    return null;
+  }, []);
+
+  // Use native event listeners with { passive: false } for proper touch handling
+  useEffect(() => {
+    const dotsElement = dotsRef.current;
+    if (!dotsElement) return;
+
+    const handleTouchStart = (e) => {
+      const touch = e.touches[0];
+      const dotIndex = getDotIndexAtPoint(touch.clientX, touch.clientY);
+      
+      if (dotIndex !== null) {
+        isDragging.current = true;
+        draggedPageIndex.current = dotIndex;
+        onPreviewRef.current(dotIndex);
+        e.preventDefault(); // Prevent scrolling when starting on a dot
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (!isDragging.current) return;
+      
+      const touch = e.touches[0];
+      const dotIndex = getDotIndexAtPoint(touch.clientX, touch.clientY);
+      
+      if (dotIndex !== null && dotIndex !== draggedPageIndex.current) {
+        draggedPageIndex.current = dotIndex;
+        onPreviewRef.current(dotIndex);
+      }
+      
+      e.preventDefault(); // Prevent scrolling during drag
+    };
+
+    const handleTouchEnd = () => {
+      if (!isDragging.current) return;
+      
+      isDragging.current = false;
+      
+      // Navigate to the last previewed page
+      if (draggedPageIndex.current !== null) {
+        onPageChangeRef.current(draggedPageIndex.current);
+        onPreviewRef.current(null);
+        draggedPageIndex.current = null;
+      }
+    };
+
+    // Add event listeners with { passive: false } to allow preventDefault
+    dotsElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+    dotsElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    dotsElement.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      dotsElement.removeEventListener('touchstart', handleTouchStart);
+      dotsElement.removeEventListener('touchmove', handleTouchMove);
+      dotsElement.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [getDotIndexAtPoint]);
+
   return (
     <div className="pagination">
       <button
@@ -43,12 +135,17 @@ const Pagination = ({ currentPage, totalPages, onPageChange, expandedFromPage })
         </svg>
       </button>
 
-      <div className="pagination__dots">
+      <div 
+        className="pagination__dots"
+        ref={dotsRef}
+      >
         {Array.from({ length: totalPages }, (_, index) => (
           <button
             key={index}
             className={getDotClassName(index)}
             onClick={() => onPageChange(index)}
+            onMouseEnter={() => onPreview(index)}
+            onMouseLeave={() => onPreview(null)}
             aria-label={`Go to page ${index + 1}`}
             aria-current={index === currentPage ? 'page' : undefined}
           />

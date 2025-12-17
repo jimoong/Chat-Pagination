@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import ChatThread from './ChatThread';
 import Pagination from './Pagination';
 import ChatInput from './ChatInput';
@@ -10,21 +11,22 @@ const ChatPanel = ({
   onNewMessage,
   expandedFromPage,
 }) => {
-  const currentTurn = conversation[currentPage];
+  const [previewPage, setPreviewPage] = useState(null);
+  
+  // Show preview page if hovering, otherwise show current page
+  const displayPage = previewPage !== null ? previewPage : currentPage;
+  const currentTurn = conversation[displayPage];
+  const isPreview = previewPage !== null && previewPage !== currentPage;
 
   return (
     <div className="chat-panel">
-      {/* <div className="chat-panel__header">
-        <h1 className="chat-panel__title">Data Agent</h1>
-        <p className="chat-panel__subtitle">Ask questions about your business data</p>
-      </div> */}
-
       <ChatThread
         turn={currentTurn}
         onExpandArtifact={onExpandArtifact}
         onPageChange={onPageChange}
         currentPage={currentPage}
         totalPages={conversation.length}
+        isPreview={isPreview}
       />
 
       <Pagination
@@ -32,6 +34,7 @@ const ChatPanel = ({
         totalPages={conversation.length}
         onPageChange={onPageChange}
         expandedFromPage={expandedFromPage}
+        onPreview={setPreviewPage}
       />
 
       <ChatInput onSubmit={onNewMessage} />

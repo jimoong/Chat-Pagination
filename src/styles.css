@@ -38,6 +38,7 @@
 html, body, #root {
   height: 100%;
   width: 100%;
+  overscroll-behavior-x: none; /* Prevent Chrome swipe-back gesture */
 }
 
 body {
@@ -115,6 +116,7 @@ body {
   gap: 20px;
   width: 100%;
   max-width: 800px;
+  touch-action: pan-y; /* Allow vertical scroll, capture horizontal for swipe */
 }
 
 .chat-thread::-webkit-scrollbar {
@@ -132,6 +134,11 @@ body {
 
 .chat-thread::-webkit-scrollbar-thumb:hover {
   background: var(--color-gray-400);
+}
+
+.chat-thread--preview {
+  opacity: 0.7;
+  background: var(--color-gray-50);
 }
 
 /* ===========================================
@@ -331,35 +338,49 @@ body {
 .pagination__dots {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0; /* No gap for continuous hover */
+  touch-action: none; /* Capture all touch for drag-to-preview */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .pagination__dot {
+  position: relative;
+  width: 20px;  /* Larger tap target */
+  height: 24px; /* Larger tap target */
+  background: transparent;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination__dot::after {
+  content: '';
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--color-gray-300);
-  cursor: pointer;
   transition: all var(--transition-fast);
-  border: none;
-  padding: 0;
 }
 
-.pagination__dot:hover {
+.pagination__dot:hover::after {
   background: var(--color-gray-500);
 }
 
-.pagination__dot--active {
+.pagination__dot--active::after {
   background: var(--color-black);
   transform: scale(1.25);
 }
 
-.pagination__dot--expanded {
+.pagination__dot--expanded::after {
   background: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
-.pagination__dot--expanded.pagination__dot--active {
+.pagination__dot--expanded.pagination__dot--active::after {
   background: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
 }
