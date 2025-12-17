@@ -83,6 +83,7 @@ body {
   transition: width var(--transition-slow);
   background: var(--color-white);
   align-items: center;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .chat-panel__header {
@@ -403,6 +404,7 @@ body {
   display: flex;
   gap: 12px;
   padding: 16px 24px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   background: var(--color-white);
   flex-shrink: 0;
   max-width: 800px;

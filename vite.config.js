@@ -13,7 +13,7 @@ export default defineConfig({
         name: 'Chat Pagination',
         short_name: 'ChatPage',
         description: 'Chat interface with pagination prototype',
-        theme_color: '#2563eb',
+        theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
         scope: '/Chat-Pagination/',
