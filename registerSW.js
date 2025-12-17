@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Chat-Pagination/sw.js', { scope: '/Chat-Pagination/' })})}
