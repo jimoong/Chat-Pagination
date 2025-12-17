@@ -41,7 +41,7 @@ const MessageBubble = ({ message, isUser, artifact, onExpandArtifact }) => {
 
   return (
     <div className={`message ${isUser ? 'message--user' : 'message--ai'}`}>
-      <span className="message__label">{isUser ? 'You' : 'AI Agent'}</span>
+      {/* <span className="message__label">{isUser ? 'You' : 'AI Agent'}</span> */}
       <div className="message__bubble">{message}</div>
       {!isUser && renderArtifact()}
     </div>
