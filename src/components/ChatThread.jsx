@@ -14,11 +14,11 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
     const now = Date.now();
     if (now - lastScrollTime.current < SCROLL_CONFIG.debounceMs) return;
 
-    // Scroll down = next page, scroll up = previous page
-    if (e.deltaY > SCROLL_CONFIG.sensitivity && currentPage < totalPages - 1) {
+    // Horizontal scroll only: swipe right = next page, swipe left = previous page
+    if (e.deltaX > SCROLL_CONFIG.sensitivity && currentPage < totalPages - 1) {
       lastScrollTime.current = now;
       onPageChange(currentPage + 1);
-    } else if (e.deltaY < -SCROLL_CONFIG.sensitivity && currentPage > 0) {
+    } else if (e.deltaX < -SCROLL_CONFIG.sensitivity && currentPage > 0) {
       lastScrollTime.current = now;
       onPageChange(currentPage - 1);
     }
