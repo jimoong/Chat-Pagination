@@ -21,6 +21,18 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
   const touchStartY = useRef(0);
   const isSwiping = useRef(false);
   const isHorizontalSwipe = useRef(false);
+  const isAnimatingRef = useRef(false);
+  
+  // Store props in refs for stable access in event handlers
+  const currentPageRef = useRef(currentPage);
+  const totalPagesRef = useRef(totalPages);
+  const onPageChangeRef = useRef(onPageChange);
+  
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+    totalPagesRef.current = totalPages;
+    onPageChangeRef.current = onPageChange;
+  }, [currentPage, totalPages, onPageChange]);
   
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -50,7 +62,7 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
     if (!container) return;
 
     const handleTouchStart = (e) => {
-      if (isAnimating) return;
+      if (isAnimatingRef.current) return;
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
       isSwiping.current = true;
@@ -59,7 +71,7 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
     };
 
     const handleTouchMove = (e) => {
-      if (!isSwiping.current || isAnimating) return;
+      if (!isSwiping.current || isAnimatingRef.current) return;
       
       const deltaX = e.touches[0].clientX - touchStartX.current;
       const deltaY = e.touches[0].clientY - touchStartY.current;
@@ -77,8 +89,10 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
         
         // Apply resistance at edges
         let offset = deltaX;
-        const isAtStart = currentPage === 0 && deltaX > 0;
-        const isAtEnd = currentPage === totalPages - 1 && deltaX < 0;
+        const page = currentPageRef.current;
+        const total = totalPagesRef.current;
+        const isAtStart = page === 0 && deltaX > 0;
+        const isAtEnd = page === total - 1 && deltaX < 0;
         
         if (isAtStart || isAtEnd) {
           offset = deltaX * SWIPE_CONFIG.resistance;
@@ -89,8 +103,13 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
     };
 
     const handleTouchEnd = (e) => {
-      if (!isSwiping.current || isAnimating) return;
+      if (!isSwiping.current || isAnimatingRef.current) return;
       isSwiping.current = false;
+      
+      if (!isHorizontalSwipe.current) {
+        setSwipeOffset(0);
+        return;
+      }
 
       const touchEndX = e.changedTouches[0].clientX;
       const touchEndY = e.changedTouches[0].clientY;
@@ -101,40 +120,55 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
       const absX = Math.abs(deltaX);
       const absY = Math.abs(deltaY);
       
+      const page = currentPageRef.current;
+      const total = totalPagesRef.current;
+      
       // Check if it's a valid horizontal swipe
       const isValidSwipe = absX >= SWIPE_CONFIG.minDistance && 
                           (absY === 0 || absY / absX <= SWIPE_CONFIG.maxVerticalRatio);
       
       if (isValidSwipe) {
-        if (deltaX < 0 && currentPage < totalPages - 1) {
+        if (deltaX < 0 && page < total - 1) {
           // Swipe left = next page - animate out
+          isAnimatingRef.current = true;
           setIsAnimating(true);
           setSwipeOffset(-window.innerWidth);
           setTimeout(() => {
-            onPageChange(currentPage + 1);
+            onPageChangeRef.current(page + 1);
             setSwipeOffset(0);
             setIsAnimating(false);
+            isAnimatingRef.current = false;
           }, 250);
-        } else if (deltaX > 0 && currentPage > 0) {
+        } else if (deltaX > 0 && page > 0) {
           // Swipe right = previous page - animate out
+          isAnimatingRef.current = true;
           setIsAnimating(true);
           setSwipeOffset(window.innerWidth);
           setTimeout(() => {
-            onPageChange(currentPage - 1);
+            onPageChangeRef.current(page - 1);
             setSwipeOffset(0);
             setIsAnimating(false);
+            isAnimatingRef.current = false;
           }, 250);
         } else {
-          // Snap back
+          // Snap back (at edge)
+          isAnimatingRef.current = true;
           setIsAnimating(true);
           setSwipeOffset(0);
-          setTimeout(() => setIsAnimating(false), 250);
+          setTimeout(() => {
+            setIsAnimating(false);
+            isAnimatingRef.current = false;
+          }, 250);
         }
       } else {
         // Snap back to original position
+        isAnimatingRef.current = true;
         setIsAnimating(true);
         setSwipeOffset(0);
-        setTimeout(() => setIsAnimating(false), 250);
+        setTimeout(() => {
+          setIsAnimating(false);
+          isAnimatingRef.current = false;
+        }, 250);
       }
     };
 
@@ -147,7 +181,7 @@ const ChatThread = ({ turn, onExpandArtifact, onPageChange, currentPage, totalPa
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [currentPage, totalPages, onPageChange, isAnimating]);
+  }, []); // Empty deps - handlers use refs
 
   if (!turn) return null;
 
