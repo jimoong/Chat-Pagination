@@ -39,6 +39,8 @@ html, body, #root {
   height: 100%;
   width: 100%;
   overscroll-behavior-x: none; /* Prevent Chrome swipe-back gesture */
+  -webkit-touch-callout: none; /* Disable callout on long press */
+  touch-action: pan-x pan-y; /* Allow scrolling but prevent zoom gestures */
 }
 
 body {
