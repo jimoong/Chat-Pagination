@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const ChatInput = ({ onSubmit, disabled }) => {
   const [message, setMessage] = useState('');
+  const inputRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim() && !disabled) {
       onSubmit(message.trim());
       setMessage('');
+      // Blur input to close keyboard on mobile
+      inputRef.current?.blur();
     }
   };
 
@@ -21,6 +24,7 @@ const ChatInput = ({ onSubmit, disabled }) => {
   return (
     <form className="chat-input" onSubmit={handleSubmit}>
       <textarea
+        ref={inputRef}
         className="chat-input__field"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
