@@ -20,22 +20,24 @@ const ChatPanel = ({
 
   return (
     <div className="chat-panel">
-      <ChatThread
-        turn={currentTurn}
-        onExpandArtifact={onExpandArtifact}
-        onPageChange={onPageChange}
-        currentPage={currentPage}
-        totalPages={conversation.length}
-        isPreview={isPreview}
-      />
+      <div className="chat-room">
+        <ChatThread
+          turn={currentTurn}
+          onExpandArtifact={onExpandArtifact}
+          onPageChange={onPageChange}
+          currentPage={currentPage}
+          totalPages={conversation.length}
+          isPreview={isPreview}
+        />
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={conversation.length}
-        onPageChange={onPageChange}
-        expandedFromPage={expandedFromPage}
-        onPreview={setPreviewPage}
-      />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={conversation.length}
+          onPageChange={onPageChange}
+          expandedFromPage={expandedFromPage}
+          onPreview={setPreviewPage}
+        />
+      </div>
 
       <ChatInput onSubmit={onNewMessage} />
     </div>

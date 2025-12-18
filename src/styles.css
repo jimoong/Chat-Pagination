@@ -45,12 +45,19 @@ html, body, #root {
 
 body {
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
   color: var(--color-black);
   background-color: var(--color-white);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Larger font size on mobile for better readability */
+@media (max-width: 768px) {
+  body {
+    font-size: 20px;
+  }
 }
 
 /* ===========================================
@@ -112,6 +119,19 @@ body {
   font-size: 12px;
   color: var(--color-gray-500);
   margin-top: 2px;
+}
+
+/* ===========================================
+   Chat Room (Thread + Pagination wrapper)
+   =========================================== */
+.chat-room {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  max-width: 800px;
+  overflow: hidden;
+  align-items: center;
 }
 
 /* ===========================================
@@ -429,7 +449,10 @@ body {
     right: 0;
     max-width: 100%;
     z-index: 100;
-    border-top: 1px solid var(--color-gray-200);
+  }
+  
+  .chat-input__field {
+    font-size: 20px;
   }
 }
 
